@@ -55,7 +55,7 @@ def main():
 
     use_brect = True
 
-    arduino = serial.Serial(port="COM3", baudrate=9600, timeout=.1)
+    arduino = serial.Serial(port="COM4", baudrate=9600, timeout=.1)
 
     # Camera preparation ###############################################################
     cap = cv.VideoCapture(cap_device)
@@ -85,14 +85,15 @@ def main():
     cvFpsCalc = CvFpsCalc(buffer_len=10)
 
     # Coordinate history #################################################################
-    history_length = 16
-    point_history = deque(maxlen=history_length)
+    # history_length = 16
+    # point_history = deque(maxlen=history_length)
 
     # Finger gesture history ################################################
     # finger_gesture_history = deque(maxlen=history_length)
 
     #  ########################################################################
     mode = 0
+    relayNumber = 0
 
     while True:
         fps = cvFpsCalc.get()
@@ -143,11 +144,32 @@ def main():
                 last_hand_sign_id = hand_sign_id
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
 
-                if hand_sign_id != last_hand_sign_id:
-                    if hand_sign_id == 0:
-                        arduino.write(b'0');
-                    elif hand_sign_id == 1:
-                        arduino.write(b'1');
+                if relayNumber ==  0 and hand_sign_id != last_hand_sign_id:
+                    if hand_sign_id == 2:
+                        relayNumber = 1
+                        arduino.write(b'2')
+                    elif hand_sign_id == 4:
+                        relayNumber = 2
+                        arduino.write(b'4')
+                elif hand_sign_id != last_hand_sign_id:
+                    if relayNumber == 1:
+                        if hand_sign_id == 0:
+                            arduino.write(b'0')
+                        elif hand_sign_id == 1:
+                            arduino.write(b'1')
+                        elif hand_sign_id == 2:
+                            relayNumber = 0
+                            arduino.write(b'2')
+                    elif relayNumber == 2:
+                        if hand_sign_id == 0:
+                            arduino.write(b'0')
+                        elif hand_sign_id == 1:
+                            arduino.write(b'1')
+                        elif hand_sign_id == 4:
+                            relayNumber = 0
+                            arduino.write(b'4')
+
+
 
                 # Drawing part
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
@@ -159,7 +181,7 @@ def main():
                     keypoint_classifier_labels[hand_sign_id],
                 )
 
-        debug_image = draw_info(debug_image, fps, mode, number)
+        debug_image = draw_info(debug_image, fps, mode, number, relayNumber)
 
         # Screen reflection #############################################################
         cv.imshow('Hand Gesture Recognition', debug_image)
@@ -462,11 +484,15 @@ def draw_info_text(image, brect, handedness, hand_sign_text):
     return image
 
 
-def draw_info(image, fps, mode, number):
+def draw_info(image, fps, mode, number, relayNumber):
     cv.putText(image, "FPS:" + str(fps), (10, 30), cv.FONT_HERSHEY_SIMPLEX,
                1.0, (0, 0, 0), 4, cv.LINE_AA)
     cv.putText(image, "FPS:" + str(fps), (10, 30), cv.FONT_HERSHEY_SIMPLEX,
                1.0, (255, 255, 255), 2, cv.LINE_AA)
+
+    if relayNumber != 0:
+        cv.putText(image, "\nRelay Number:" + str(relayNumber), (10, 70), cv.FONT_HERSHEY_SIMPLEX,
+                   1.0, (255, 255, 255), 2, cv.LINE_AA)
 
     mode_string = ['Logging Key Point', 'Logging Point History']
     if 1 <= mode <= 2:
