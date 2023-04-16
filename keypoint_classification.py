@@ -11,7 +11,7 @@ from keras.layers import Dense, Flatten, Dropout, Input, LSTM
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
-
+from keras.regularizers import l2
 
 RANDOM_SEED = 42
 
@@ -30,12 +30,13 @@ print(np.shape(X_train))
 print("Choose NN:")
 print("1 - Dense")
 print("2 - Conv 1D")
+print("3 - Conv 1D + SVM")
 print("3 - LSTM")
 print("4 - KNN\n")
 
 opt = int(input("Enter Option: "))
 
-if opt == 1: # Dense NN
+if opt == 1:  # Dense NN
     model = tf.keras.models.Sequential([
         tf.keras.layers.Input((21 * 2,)),
         tf.keras.layers.Dropout(0.2),
@@ -45,7 +46,7 @@ if opt == 1: # Dense NN
         tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
     ])
 
-elif opt == 2: # CNN 1D
+elif opt == 2:  # CNN 1D
     X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
 
     model = Sequential()
@@ -57,7 +58,19 @@ elif opt == 2: # CNN 1D
     model.add(Dense(100, activation='relu'))
     model.add(Dense(5, activation='softmax'))
 
-elif opt == 3: # LSTM
+elif opt == 3:  # CNN + SVM
+    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+
+    model = Sequential()
+    model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(42, 1)))
+    model.add(Conv1D(filters=64, kernel_size=3, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(5, kernel_regularizer=l2(0.01), activation='softmax'))
+
+elif opt == 4:  # LSTM
     model = Sequential()
     model.add(LSTM(256, return_sequences=True, input_shape=(42, 1)))
     model.add(LSTM(128, return_sequences=True))
@@ -65,7 +78,7 @@ elif opt == 3: # LSTM
     model.add(LSTM(16))
     model.add(Dense(5, activation='softmax'))
 
-elif opt == 4: # KNN
+elif opt == 5: # KNN
     model = KNeighborsClassifier()
     model.fit(
         X_train,
@@ -77,6 +90,7 @@ elif opt == 4: # KNN
     print(accuracy_score(y_test, y_pred))
 
     quit()
+
 
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
@@ -155,7 +169,7 @@ output_details = interpreter.get_output_details()
 
 print(np.shape(X_test))
 
-if opt == 2:
+if opt == 2 or opt == 3 or opt == 4:
     X_test = np.reshape(X_test, (np.shape(X_test)[0], np.shape(X_test)[1], 1))
 
 print(np.shape(X_test))
