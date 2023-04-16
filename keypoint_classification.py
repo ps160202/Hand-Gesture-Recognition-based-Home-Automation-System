@@ -4,6 +4,11 @@ import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
+from keras.models import Sequential
+from keras.layers.convolutional import Conv1D, MaxPooling1D
+from keras.layers import Dense, Flatten, Dropout, Input
+
+
 RANDOM_SEED = 42
 
 dataset = 'model/keypoint_classifier/keypoint.csv'
@@ -16,14 +21,37 @@ y_dataset = np.loadtxt(dataset, delimiter=',', dtype='int32', usecols=(0))
 
 X_train, X_test, y_train, y_test = train_test_split(X_dataset, y_dataset, train_size=0.75, random_state=RANDOM_SEED)
 
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Input((21 * 2,)),
-    tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(20, activation='relu'),
-    tf.keras.layers.Dropout(0.4),
-    tf.keras.layers.Dense(10, activation='relu'),
-    tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
-])
+print(np.shape(X_train))
+
+print("Choose NN:")
+print("1 - Dense")
+print("2 - Conv 1D\n")
+
+opt = int(input("Enter Option: "))
+
+if opt == 1: # Dense NN
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Input((21 * 2,)),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(20, activation='relu'),
+        tf.keras.layers.Dropout(0.4),
+        tf.keras.layers.Dense(10, activation='relu'),
+        tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
+    ])
+
+elif opt == 2: # CNN 1D
+    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+
+    model = Sequential()
+    model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(42, 1)))
+    model.add(Conv1D(filters=64, kernel_size=3, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(5, activation='softmax'))
+
+
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
 
@@ -99,7 +127,16 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
+print(np.shape(X_test))
+
+if opt == 2:
+    X_test = np.reshape(X_test, (np.shape(X_test)[0], np.shape(X_test)[1], 1))
+
+print(np.shape(X_test))
+
+
 interpreter.set_tensor(input_details[0]['index'], np.array([X_test[0]]))
+
 
 # %%time
 # Inference implementation
