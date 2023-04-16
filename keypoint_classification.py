@@ -6,7 +6,11 @@ from sklearn.model_selection import train_test_split
 
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D, MaxPooling1D
-from keras.layers import Dense, Flatten, Dropout, Input
+from keras.layers import Dense, Flatten, Dropout, Input, LSTM
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, accuracy_score
+
 
 
 RANDOM_SEED = 42
@@ -25,7 +29,9 @@ print(np.shape(X_train))
 
 print("Choose NN:")
 print("1 - Dense")
-print("2 - Conv 1D\n")
+print("2 - Conv 1D")
+print("3 - LSTM")
+print("4 - KNN\n")
 
 opt = int(input("Enter Option: "))
 
@@ -51,6 +57,13 @@ elif opt == 2: # CNN 1D
     model.add(Dense(100, activation='relu'))
     model.add(Dense(5, activation='softmax'))
 
+elif opt == 3: # LSTM
+    model = Sequential()
+    model.add(LSTM(256, return_sequences=True, input_shape=(42, 1)))
+    model.add(LSTM(128, return_sequences=True))
+    model.add(LSTM(64, return_sequences=True))
+    model.add(LSTM(16))
+    model.add(Dense(5, activation='softmax'))
 
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
