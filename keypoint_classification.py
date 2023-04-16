@@ -65,6 +65,19 @@ elif opt == 3: # LSTM
     model.add(LSTM(16))
     model.add(Dense(5, activation='softmax'))
 
+elif opt == 4: # KNN
+    model = KNeighborsClassifier()
+    model.fit(
+        X_train,
+        y_train,
+    )
+    y_pred = model.predict(X_test)
+
+    print(classification_report(y_test, y_pred))
+    print(accuracy_score(y_test, y_pred))
+
+    quit()
+
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
 

@@ -135,11 +135,11 @@ def main():
                     landmark_list)
 
                 # CNN 1D Code / LSTM Code
-                pre_processed_landmark_list = np.array(pre_processed_landmark_list)
-                # print(pre_processed_landmark_list)
-                # print(np.shape(pre_processed_landmark_list))
-                pre_processed_landmark_list = np.reshape(pre_processed_landmark_list, (
-                np.shape(pre_processed_landmark_list)[0], 1))
+                # pre_processed_landmark_list = np.array(pre_processed_landmark_list)
+                # # print(pre_processed_landmark_list)
+                # # print(np.shape(pre_processed_landmark_list))
+                # pre_processed_landmark_list = np.reshape(pre_processed_landmark_list, (
+                # np.shape(pre_processed_landmark_list)[0], 1))
 
                 pre_processed_point_history_list=[]
                 # Write to the dataset file IF k has been pressed. Mode is 1.
