@@ -19,6 +19,7 @@ import serial
 last_hand_sign_id = KeyPointClassifier()
 hand_sign_id = KeyPointClassifier()
 
+
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -139,9 +140,9 @@ def main():
                 # print(pre_processed_landmark_list)
                 # print(np.shape(pre_processed_landmark_list))
                 pre_processed_landmark_list = np.reshape(pre_processed_landmark_list, (
-                np.shape(pre_processed_landmark_list)[0], 1))
+                    np.shape(pre_processed_landmark_list)[0], 1))
 
-                pre_processed_point_history_list=[]
+                pre_processed_point_history_list = []
                 # Write to the dataset file IF k has been pressed. Mode is 1.
                 logging_csv(number, mode, pre_processed_landmark_list,
                             pre_processed_point_history_list)
@@ -151,7 +152,7 @@ def main():
                 last_hand_sign_id = hand_sign_id
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
 
-                if relayNumber ==  0 and hand_sign_id != last_hand_sign_id:
+                if relayNumber == 0 and hand_sign_id != last_hand_sign_id:
                     if hand_sign_id == 2:
                         relayNumber = 1
                         arduino.write(b'2')
@@ -175,8 +176,6 @@ def main():
                         elif hand_sign_id == 4:
                             relayNumber = 0
                             arduino.write(b'4')
-
-
 
                 # Drawing part
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)

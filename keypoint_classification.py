@@ -31,8 +31,8 @@ print("Choose NN:")
 print("1 - Dense")
 print("2 - Conv 1D")
 print("3 - Conv 1D + SVM")
-print("3 - LSTM")
-print("4 - KNN\n")
+print("4 - LSTM")
+print("5 - KNN\n")
 
 opt = int(input("Enter Option: "))
 
@@ -78,7 +78,7 @@ elif opt == 4:  # LSTM
     model.add(LSTM(16))
     model.add(Dense(5, activation='softmax'))
 
-elif opt == 5: # KNN
+elif opt == 5:  # KNN
     model = KNeighborsClassifier()
     model.fit(
         X_train,
@@ -90,8 +90,6 @@ elif opt == 5: # KNN
     print(accuracy_score(y_test, y_pred))
 
     quit()
-
-
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
 
@@ -174,9 +172,7 @@ if opt == 2 or opt == 3 or opt == 4:
 
 print(np.shape(X_test))
 
-
 interpreter.set_tensor(input_details[0]['index'], np.array([X_test[0]]))
-
 
 # %%time
 # Inference implementation
