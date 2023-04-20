@@ -6,12 +6,16 @@ from sklearn.model_selection import train_test_split
 
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D, MaxPooling1D
-from keras.layers import Dense, Flatten, Dropout, Input, LSTM
+from keras.layers import Dense, Flatten, Dropout, Input, LSTM, Bidirectional, Embedding, TimeDistributed, ConvLSTM1D, GRU
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
 from keras.regularizers import l2
+
+from time import time
+
+
 
 RANDOM_SEED = 42
 
@@ -31,8 +35,11 @@ print("Choose NN:")
 print("1 - Dense")
 print("2 - Conv 1D")
 print("3 - Conv 1D + SVM")
-print("3 - LSTM")
-print("4 - KNN\n")
+print("4 - Conv 1D + LSTM") #
+print("5 - ConvLSTM") #
+print("6 - LSTM")
+print("7 - Bi LSTM") #
+print("8 - KNN\n")
 
 opt = int(input("Enter Option: "))
 
@@ -70,7 +77,34 @@ elif opt == 3:  # CNN + SVM
     model.add(Dense(100, activation='relu'))
     model.add(Dense(5, kernel_regularizer=l2(0.01), activation='softmax'))
 
-elif opt == 4:  # LSTM
+elif opt == 4:  # CNN + LSTM
+    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+
+    model = Sequential()
+    model.add(
+        TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
+                        input_shape=(None, np.shape(X_train)[1], 1)))
+    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
+    model.add(TimeDistributed(Dropout(0.5)))
+    model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+    model.add(TimeDistributed(Flatten()))
+    model.add(LSTM(100))
+    model.add(Dropout(0.5))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(5, activation='softmax'))
+
+elif opt == 5:  # Conv LSTM 2D
+    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+
+    model = Sequential()
+    model.add(
+        ConvLSTM1D(filters=64, kernel_size=3, activation='relu', input_shape=(1, 42, 1)))
+    model.add(Dropout(0.5))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(5, activation='softmax'))
+
+elif opt == 6:  # LSTM
     model = Sequential()
     model.add(LSTM(256, return_sequences=True, input_shape=(42, 1)))
     model.add(LSTM(128, return_sequences=True))
@@ -78,7 +112,20 @@ elif opt == 4:  # LSTM
     model.add(LSTM(16))
     model.add(Dense(5, activation='softmax'))
 
-elif opt == 5: # KNN
+elif opt == 7:  # Bi LSTM
+    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+
+    model = Sequential()
+    model.add(Bidirectional(LSTM(256, return_sequences=True, input_shape=(42, 1))))
+    model.add(Bidirectional(LSTM(64)))
+    model.add(Bidirectional(LSTM(64)))
+    model.add(Dropout(0.5))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(5, activation='softmax'))
+
+    model.build((None, 42, 1))
+
+elif opt == 8: # KNN
     model = KNeighborsClassifier()
     model.fit(
         X_train,
@@ -90,7 +137,6 @@ elif opt == 5: # KNN
     print(accuracy_score(y_test, y_pred))
 
     quit()
-
 
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
@@ -106,6 +152,8 @@ model.compile(
     metrics=['accuracy']
 )
 
+start = time()
+
 model.fit(
     X_train,
     y_train,
@@ -114,6 +162,9 @@ model.fit(
     validation_data=(X_test, y_test),
     callbacks=[cp_callback, es_callback]
 )
+
+print("CNN")
+print(time()-start)
 
 val_loss, val_acc = model.evaluate(X_test, y_test, batch_size=128)
 
@@ -169,7 +220,7 @@ output_details = interpreter.get_output_details()
 
 print(np.shape(X_test))
 
-if opt == 2 or opt == 3 or opt == 4:
+if opt == 2 or opt == 3 or opt == 6 or opt == 7:
     X_test = np.reshape(X_test, (np.shape(X_test)[0], np.shape(X_test)[1], 1))
 
 print(np.shape(X_test))
