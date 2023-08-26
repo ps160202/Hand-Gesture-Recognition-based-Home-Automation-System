@@ -1,4 +1,3 @@
-int flag = 0;
 char serialData;
 
 void setup() {
@@ -20,10 +19,10 @@ void loop() {
         while(!Serial.available());
         serialData = Serial.read();
 
-        if(serialData == '1') {
+        if(serialData == '0') {
           digitalWrite(8, LOW);
         }
-        else if(serialData == '0') {
+        else if(serialData == '1') {
           digitalWrite(8, HIGH);
         }
         else if(serialData == '2') {
@@ -36,10 +35,10 @@ void loop() {
         while(!Serial.available());
         serialData = Serial.read();
 
-        if(serialData == '1') {
+        if(serialData == '0') {
           digitalWrite(7, LOW);
         }
-        else if(serialData == '0') {
+        else if(serialData == '1') {
           digitalWrite(7, HIGH);
         }
         else if(serialData == '4') {

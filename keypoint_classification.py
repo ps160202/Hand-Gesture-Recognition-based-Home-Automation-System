@@ -47,9 +47,9 @@ if opt == 1:  # Dense NN
     model = tf.keras.models.Sequential([
         tf.keras.layers.Input((21 * 2,)),
         tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(20, activation='relu'),
+        tf.keras.layers.Dense(200, activation='relu'),
         tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(10, activation='relu'),
+        tf.keras.layers.Dense(100, activation='relu'),
         tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
     ])
 
@@ -63,7 +63,8 @@ elif opt == 2:  # CNN 1D
     model.add(MaxPooling1D(pool_size=2))
     model.add(Flatten())
     model.add(Dense(100, activation='relu'))
-    model.add(Dense(5, activation='softmax'))
+    # model.add(Dense(NUM_CLASSES, activation='softmax'))
+    model.add(Dense(NUM_CLASSES, activation='sigmoid'))
 
 elif opt == 3:  # CNN + SVM
     X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
@@ -75,53 +76,54 @@ elif opt == 3:  # CNN + SVM
     model.add(MaxPooling1D(pool_size=2))
     model.add(Flatten())
     model.add(Dense(100, activation='relu'))
-    model.add(Dense(5, kernel_regularizer=l2(0.01), activation='softmax'))
+    model.add(Dense(NUM_CLASSES, kernel_regularizer=l2(0.01), activation='softmax'))
 
-elif opt == 4:  # CNN + LSTM
-    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
-
-    model = Sequential()
-    model.add(
-        TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
-                        input_shape=(None, np.shape(X_train)[1], 1)))
-    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
-    model.add(TimeDistributed(Dropout(0.5)))
-    model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
-    model.add(TimeDistributed(Flatten()))
-    model.add(LSTM(100))
-    model.add(Dropout(0.5))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(5, activation='softmax'))
-
-elif opt == 5:  # Conv LSTM 2D
-    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
-
-    model = Sequential()
-    model.add(
-        ConvLSTM1D(filters=64, kernel_size=3, activation='relu', input_shape=(1, 42, 1)))
-    model.add(Dropout(0.5))
-    model.add(Flatten())
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(5, activation='softmax'))
+# elif opt == 4:  # CNN + LSTM
+#     X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+#
+#     model = Sequential()
+#     model.add(
+#         TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
+#                         input_shape=(None, np.shape(X_train)[1], 1)))
+#     model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
+#     model.add(TimeDistributed(Dropout(0.5)))
+#     model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+#     model.add(TimeDistributed(Flatten()))
+#     model.add(LSTM(100))
+#     model.add(Dropout(0.5))
+#     model.add(Dense(100, activation='relu'))
+#     model.add(Dense(5, activation='softmax'))
+#
+# elif opt == 5:  # Conv LSTM 2D
+#     X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+#
+#     model = Sequential()
+#     model.add(
+#         ConvLSTM1D(filters=64, kernel_size=3, activation='relu', input_shape=(1, 42, 1)))
+#     model.add(Dropout(0.5))
+#     model.add(Flatten())
+#     model.add(Dense(100, activation='relu'))
+#     model.add(Dense(5, activation='softmax'))
 
 elif opt == 6:  # LSTM
     model = Sequential()
     model.add(LSTM(256, return_sequences=True, input_shape=(42, 1)))
+    model.add(Dropout(0.5))
     model.add(LSTM(128, return_sequences=True))
     model.add(LSTM(64, return_sequences=True))
     model.add(LSTM(16))
-    model.add(Dense(5, activation='softmax'))
+    model.add(Dense(NUM_CLASSES, activation='softmax'))
 
-elif opt == 7:  # Bi LSTM
-    X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
-
-    model = Sequential()
-    model.add(Bidirectional(LSTM(256, return_sequences=True, input_shape=(42, 1))))
-    model.add(Bidirectional(LSTM(64)))
-    model.add(Bidirectional(LSTM(64)))
-    model.add(Dropout(0.5))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(5, activation='softmax'))
+# elif opt == 7:  # Bi LSTM
+#     X_train = np.reshape(X_train, (np.shape(X_train)[0], np.shape(X_train)[1], 1))
+#
+#     model = Sequential()
+#     model.add(Bidirectional(LSTM(256, return_sequences=True, input_shape=(42, 1))))
+#     model.add(Bidirectional(LSTM(64)))
+#     model.add(Bidirectional(LSTM(64)))
+#     model.add(Dropout(0.5))
+#     model.add(Dense(100, activation='relu'))
+#     model.add(Dense(5, activation='softmax'))
 
     model.build((None, 42, 1))
 
@@ -224,6 +226,9 @@ if opt == 2 or opt == 3 or opt == 6 or opt == 7:
     X_test = np.reshape(X_test, (np.shape(X_test)[0], np.shape(X_test)[1], 1))
 
 print(np.shape(X_test))
+
+print("Accuracy Core: ")
+print(accuracy_score(y_test, y_pred))
 
 
 interpreter.set_tensor(input_details[0]['index'], np.array([X_test[0]]))

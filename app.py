@@ -94,8 +94,13 @@ def main():
     #  ########################################################################
     mode = 0
     relayNumber = 0
+    i=0
 
     while True:
+        i += 1
+
+
+
         fps = cvFpsCalc.get()
 
         # Process Key (ESC: end) #################################################
@@ -117,6 +122,9 @@ def main():
         image.flags.writeable = False
         results = hands.process(image)
         image.flags.writeable = True
+
+        if i%2 == 0:
+            continue
 
         #  ####################################################################
         # Collection of detected/tracked hands, where each hand is represented as a list of 21 hand landmarks
@@ -484,7 +492,7 @@ def draw_info_text(image, brect, handedness, hand_sign_text):
 
     info_text = handedness.classification[0].label[0:]
     if hand_sign_text != "":
-        info_text = info_text + ':' + hand_sign_text
+        info_text = info_text + ':'  + hand_sign_text
     cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
                cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
 
@@ -498,6 +506,8 @@ def draw_info(image, fps, mode, number, relayNumber):
                1.0, (255, 255, 255), 2, cv.LINE_AA)
 
     if relayNumber != 0:
+        cv.putText(image, "\nRelay Number:" + str(relayNumber), (10, 70), cv.FONT_HERSHEY_SIMPLEX,
+                   1.0, (255, 255, 255), 2, cv.LINE_AA)
         cv.putText(image, "\nRelay Number:" + str(relayNumber), (10, 70), cv.FONT_HERSHEY_SIMPLEX,
                    1.0, (255, 255, 255), 2, cv.LINE_AA)
 
