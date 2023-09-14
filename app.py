@@ -19,6 +19,7 @@ import serial
 last_hand_sign_id = KeyPointClassifier()
 hand_sign_id = KeyPointClassifier()
 
+
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -181,8 +182,6 @@ def main():
                         elif hand_sign_id == 4:
                             relayNumber = 0
                             arduino.write(b'4')
-
-
 
                 # Drawing part
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)

@@ -1,4 +1,8 @@
 import csv
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, classification_report
 
 import numpy as np
 import tensorflow as tf
@@ -138,8 +142,16 @@ elif opt == 8: # KNN
     print(classification_report(y_test, y_pred))
     print(accuracy_score(y_test, y_pred))
 
-    quit()
+    labels = sorted(list(set(y_test)))
+    cmx_data = confusion_matrix(y_test, y_pred, labels=labels)
 
+    df_cmx = pd.DataFrame(cmx_data, index=labels, columns=labels)
+
+    fig, ax = plt.subplots(figsize=(7, 6))
+    sns.heatmap(df_cmx, annot=True, fmt='g', square=False)
+    ax.set_ylim(len(set(y_test)), 0)
+    plt.show()
+    quit()
 
 model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
 
@@ -229,10 +241,7 @@ print(np.shape(X_test))
 
 print("Accuracy Core: ")
 print(accuracy_score(y_test, y_pred))
-
-
 interpreter.set_tensor(input_details[0]['index'], np.array([X_test[0]]))
-
 
 # %%time
 # Inference implementation
