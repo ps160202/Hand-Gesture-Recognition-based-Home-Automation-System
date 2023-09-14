@@ -55,7 +55,7 @@ def main():
 
     use_brect = True
 
-    arduino = serial.Serial(port="COM4", baudrate=9600, timeout=.1)
+    arduino = serial.Serial(port="COM3", baudrate=9600, timeout=.1)
 
     # Camera preparation ###############################################################
     cap = cv.VideoCapture(cap_device)
@@ -98,8 +98,6 @@ def main():
 
     while True:
         i += 1
-
-
 
         fps = cvFpsCalc.get()
 
@@ -149,7 +147,7 @@ def main():
                 # pre_processed_landmark_list = np.reshape(pre_processed_landmark_list, (
                 # np.shape(pre_processed_landmark_list)[0], 1))
 
-                pre_processed_point_history_list=[]
+                pre_processed_point_history_list = []
                 # Write to the dataset file IF k has been pressed. Mode is 1.
                 logging_csv(number, mode, pre_processed_landmark_list,
                             pre_processed_point_history_list)
@@ -159,7 +157,7 @@ def main():
                 last_hand_sign_id = hand_sign_id
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
 
-                if relayNumber ==  0 and hand_sign_id != last_hand_sign_id:
+                if relayNumber == 0 and hand_sign_id != last_hand_sign_id:
                     if hand_sign_id == 2:
                         relayNumber = 1
                         arduino.write(b'2')
